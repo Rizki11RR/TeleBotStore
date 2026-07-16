@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\VariantController;
+use App\Http\Controllers\Admin\VariantAccountController;
 use App\Http\Controllers\Admin\DigitalFileController;
 use App\Http\Controllers\Admin\QrisController;
 use App\Http\Controllers\Admin\OrderController;
@@ -46,10 +47,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
         // Katalog
+        Route::post('categories/reorder', [CategoryController::class, 'reorder'])->name('categories.reorder');
         Route::resource('categories', CategoryController::class);
+
+        Route::post('products/reorder', [ProductController::class, 'reorder'])->name('products.reorder');
         Route::resource('products', ProductController::class);
+
         Route::resource('variants', VariantController::class)->except(['index']);
-        Route::get('variants', [VariantController::class, 'index'])->name('variants.index');
+        
+        // Varian Accounts (Kredensial Stok Akun)
+        Route::get('variants/{variant}/accounts', [VariantAccountController::class, 'index'])->name('variants.accounts.index');
+        Route::post('variants/{variant}/accounts', [VariantAccountController::class, 'store'])->name('variants.accounts.store');
+        Route::delete('variants/{variant}/accounts/{account}', [VariantAccountController::class, 'destroy'])->name('variants.accounts.destroy');
+
         Route::resource('digital-files', DigitalFileController::class);
 
         // Pembayaran

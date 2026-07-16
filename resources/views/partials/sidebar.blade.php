@@ -69,12 +69,7 @@
                 </a>
             </li>
 
-            <li class="sidebar-item {{ request()->routeIs('admin.variants.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.variants.index') }}" class="sidebar-link">
-                    <i class="bi bi-list-ul"></i>
-                    <span>Varian</span>
-                </a>
-            </li>
+
 
             <li class="sidebar-item {{ request()->routeIs('admin.digital-files.*') ? 'active' : '' }}">
                 <a href="{{ route('admin.digital-files.index') }}" class="sidebar-link">

@@ -32,6 +32,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
+            'type'        => 'required|in:ebook,account',
             'name'        => 'required|string|max:150|unique:products,name',
             'description' => 'nullable|string',
             'sort_order'  => 'integer|min:0',
@@ -49,7 +50,7 @@ class ProductController extends Controller
 
     public function show(Product $product): View
     {
-        $product->load(['category', 'variants.digitalFile']);
+        $product->load(['category', 'variants.digitalFile', 'variants.accounts']);
         return view('admin.products.show', compact('product'));
     }
 
@@ -63,6 +64,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
+            'type'        => 'required|in:ebook,account',
             'name'        => "required|string|max:150|unique:products,name,{$product->id}",
             'description' => 'nullable|string',
             'sort_order'  => 'integer|min:0',
@@ -87,5 +89,23 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.index')
             ->with('success', "Produk '{$name}' berhasil dihapus.");
+    }
+
+    public function reorder(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'integer|exists:products,id',
+        ]);
+
+        $ids = $request->input('ids');
+        foreach ($ids as $index => $id) {
+            Product::withTrashed()->where('id', $id)->update(['sort_order' => $index + 1]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Urutan produk berhasil diperbarui.',
+        ]);
     }
 }

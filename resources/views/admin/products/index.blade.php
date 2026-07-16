@@ -36,18 +36,21 @@
                     <table class="table table-hover table-lg">
                         <thead>
                             <tr>
-                                <th>Urutan</th>
+                                <th style="width: 50px;"></th>
                                 <th>Kategori</th>
                                 <th>Nama Produk</th>
+                                <th>Tipe</th>
                                 <th>Jumlah Varian</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="sortable-products">
                             @forelse ($products as $prod)
-                                <tr>
-                                    <td>{{ $prod->sort_order }}</td>
+                                <tr data-id="{{ $prod->id }}">
+                                    <td>
+                                        <i class="bi bi-grip-vertical text-muted drag-handle fs-5" style="cursor: move;"></i>
+                                    </td>
                                     <td>
                                         <span class="badge bg-light-secondary text-dark">
                                             {{ $prod->category->icon ?: '📁' }} {{ $prod->category->name }}
@@ -55,6 +58,11 @@
                                     </td>
                                     <td class="fw-bold">
                                         <a href="{{ route('admin.products.show', $prod) }}" class="text-primary">{{ $prod->name }}</a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light-info text-info">
+                                            {{ $prod->type === 'account' ? 'Akun' : 'Ebook' }}
+                                        </span>
                                     </td>
                                     <td>
                                         <span class="badge bg-light-primary text-primary">
@@ -89,7 +97,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">
+                                    <td colspan="7" class="text-center text-muted py-4">
                                         Belum ada data produk.
                                     </td>
                                 </tr>
@@ -110,4 +118,72 @@
         </div>
     </section>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const el = document.getElementById('sortable-products');
+        if (el) {
+            const sortable = new Sortable(el, {
+                handle: '.drag-handle',
+                animation: 150,
+                onEnd: function () {
+                    const ids = Array.from(el.querySelectorAll('tr')).map(tr => tr.getAttribute('data-id'));
+                    
+                    fetch("{{ route('admin.products.reorder') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ ids: ids })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                        } else {
+                            showToast('Gagal memperbarui urutan.', 'danger');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        showToast('Terjadi kesalahan sistem.', 'danger');
+                    });
+                }
+            });
+        }
+
+        function showToast(message, type) {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.style.position = 'fixed';
+                container.style.bottom = '20px';
+                container.style.right = '20px';
+                container.style.zIndex = '9999';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible show fade shadow-lg`;
+            toast.style.minWidth = '250px';
+            toast.style.marginBottom = '10px';
+            toast.innerHTML = `
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="fw-bold">${message}</span>
+                    <button type="button" class="btn-close ms-2" style="position:static; padding:0; background:none; border:none; color:inherit; font-size:1.25rem;" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    });
+</script>
+@endpush
 @endsection

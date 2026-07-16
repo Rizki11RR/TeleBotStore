@@ -49,6 +49,17 @@
                         </div>
 
                         <div class="col-md-6 col-12 mb-3">
+                            <label for="type" class="form-label fw-bold">Tipe Produk <span class="text-danger">*</span></label>
+                            <select id="type" name="type" class="form-select @error('type') is-invalid @enderror" required>
+                                <option value="ebook" {{ old('type', $product->type) == 'ebook' ? 'selected' : '' }}>Ebook (File Digital)</option>
+                                <option value="account" {{ old('type', $product->type) == 'account' ? 'selected' : '' }}>Akun (Stok Kredensial)</option>
+                            </select>
+                            @error('type')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6 col-12 mb-3">
                             <label for="name" class="form-label fw-bold">Nama Produk <span class="text-danger">*</span></label>
                             <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror"
                                    value="{{ old('name', $product->name) }}" required>

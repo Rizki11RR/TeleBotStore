@@ -14,7 +14,7 @@
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.variants.index') }}">Varian</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.products.index') }}">Produk</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Tambah</li>
                     </ol>
                 </nav>
@@ -58,7 +58,7 @@
                         </div>
 
                         <div class="col-md-6 col-12 mb-3">
-                            <label for="price" class="form-label fw-bold">Harga Rupiah (IDR) <span class="text-danger">*</span></label>
+                            <label for="price" class="form-label fw-bold">Harga Promo Rupiah (IDR) <span class="text-danger">*</span></label>
                             <input type="number" id="price" name="price" class="form-control @error('price') is-invalid @enderror"
                                    placeholder="Contoh: 50000" value="{{ old('price') }}" min="0" required>
                             @error('price')
@@ -67,10 +67,20 @@
                         </div>
 
                         <div class="col-md-6 col-12 mb-3">
+                            <label for="original_price" class="form-label fw-bold">Harga Asli Rupiah (IDR) <span class="text-muted">(Opsional untuk coret)</span></label>
+                            <input type="number" id="original_price" name="original_price" class="form-control @error('original_price') is-invalid @enderror"
+                                   placeholder="Contoh: 75000" value="{{ old('original_price') }}" min="0">
+                            <div class="form-text small">Biarkan kosong jika tidak ada coretan diskon.</div>
+                            @error('original_price')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6 col-12 mb-3">
                             <label for="stock" class="form-label fw-bold">Jumlah Stok <span class="text-danger">*</span></label>
                             <input type="number" id="stock" name="stock" class="form-control @error('stock') is-invalid @enderror"
                                    value="{{ old('stock', -1) }}" min="-1" required>
-                            <div class="form-text small">Isi `-1` untuk stok tak terbatas (unlimited).</div>
+                            <div class="form-text small">Isi `-1` untuk stok tak terbatas (unlimited). Untuk produk tipe Akun, isi manual akan ditimpa oleh jumlah kredensial yang dimasukkan.</div>
                             @error('stock')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -91,7 +101,7 @@
 
                     <div class="d-flex gap-2 mt-3">
                         <button type="submit" class="btn btn-primary px-4">Simpan</button>
-                        <a href="{{ route('admin.variants.index') }}" class="btn btn-light-secondary px-4">Batal</a>
+                        <a href="{{ request('product_id') ? route('admin.products.show', request('product_id')) : route('admin.products.index') }}" class="btn btn-light-secondary px-4">Batal</a>
                     </div>
                 </form>
             </div>

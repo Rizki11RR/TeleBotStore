@@ -14,7 +14,7 @@
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.variants.index') }}">Varian</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.products.index') }}">Produk</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Edit</li>
                     </ol>
                 </nav>
@@ -58,40 +58,50 @@
                         </div>
 
                         <div class="col-md-6 col-12 mb-3">
-                            <label for="price" class="form-label fw-bold">Harga Rupiah (IDR) <span class="text-danger">*</span></label>
-                            <input type="number" id="price" name="price" class="form-control @error('price') is-invalid @enderror"
-                                   value="{{ old('price', $variant->price) }}" min="0" required>
-                            @error('price')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                             <label for="price" class="form-label fw-bold">Harga Promo Rupiah (IDR) <span class="text-danger">*</span></label>
+                             <input type="number" id="price" name="price" class="form-control @error('price') is-invalid @enderror"
+                                    value="{{ old('price', $variant->price) }}" min="0" required>
+                             @error('price')
+                                 <div class="invalid-feedback">{{ $message }}</div>
+                             @enderror
+                         </div>
 
-                        <div class="col-md-6 col-12 mb-3">
-                            <label for="stock" class="form-label fw-bold">Jumlah Stok <span class="text-danger">*</span></label>
-                            <input type="number" id="stock" name="stock" class="form-control @error('stock') is-invalid @enderror"
-                                   value="{{ old('stock', $variant->stock) }}" min="-1" required>
-                            <div class="form-text small">Isi `-1` untuk stok tak terbatas (unlimited).</div>
-                            @error('stock')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                         <div class="col-md-6 col-12 mb-3">
+                             <label for="original_price" class="form-label fw-bold">Harga Asli Rupiah (IDR) <span class="text-muted">(Opsional untuk coret)</span></label>
+                             <input type="number" id="original_price" name="original_price" class="form-control @error('original_price') is-invalid @enderror"
+                                    placeholder="Contoh: 75000" value="{{ old('original_price', $variant->original_price) }}" min="0">
+                             <div class="form-text small">Biarkan kosong jika tidak ada coretan diskon.</div>
+                             @error('original_price')
+                                 <div class="invalid-feedback">{{ $message }}</div>
+                             @enderror
+                         </div>
 
-                        <div class="col-md-6 col-12 mb-3">
-                            <label class="form-label fw-bold d-block">Status Varian</label>
-                            <div class="form-check form-check-inline mt-2">
-                                <input class="form-check-input" type="radio" name="is_active" id="active" value="1" {{ $variant->is_active ? 'checked' : '' }}>
-                                <label class="form-check-label" for="active">Aktif</label>
-                            </div>
-                            <div class="form-check form-check-inline mt-2">
-                                <input class="form-check-input" type="radio" name="is_active" id="inactive" value="0" {{ !$variant->is_active ? 'checked' : '' }}>
-                                <label class="form-check-label" for="inactive">Tidak Aktif</label>
-                            </div>
-                        </div>
+                         <div class="col-md-6 col-12 mb-3">
+                             <label for="stock" class="form-label fw-bold">Jumlah Stok <span class="text-danger">*</span></label>
+                             <input type="number" id="stock" name="stock" class="form-control @error('stock') is-invalid @enderror"
+                                    value="{{ old('stock', $variant->stock) }}" min="-1" required>
+                             <div class="form-text small">Isi `-1` untuk stok tak terbatas (unlimited). Untuk produk tipe Akun, isi manual akan ditimpa oleh jumlah kredensial yang dimasukkan.</div>
+                             @error('stock')
+                                 <div class="invalid-feedback">{{ $message }}</div>
+                             @enderror
+                         </div>
+
+                         <div class="col-md-6 col-12 mb-3">
+                             <label class="form-label fw-bold d-block">Status Varian</label>
+                             <div class="form-check form-check-inline mt-2">
+                                 <input class="form-check-input" type="radio" name="is_active" id="active" value="1" {{ $variant->is_active ? 'checked' : '' }}>
+                                 <label class="form-check-label" for="active">Aktif</label>
+                             </div>
+                             <div class="form-check form-check-inline mt-2">
+                                 <input class="form-check-input" type="radio" name="is_active" id="inactive" value="0" {{ !$variant->is_active ? 'checked' : '' }}>
+                                 <label class="form-check-label" for="inactive">Tidak Aktif</label>
+                             </div>
+                         </div>
                     </div>
 
                     <div class="d-flex gap-2 mt-3">
                         <button type="submit" class="btn btn-primary px-4">Perbarui</button>
-                        <a href="{{ route('admin.variants.index') }}" class="btn btn-light-secondary px-4">Batal</a>
+                        <a href="{{ route('admin.products.show', $variant->product_id) }}" class="btn btn-light-secondary px-4">Batal</a>
                     </div>
                 </form>
             </div>

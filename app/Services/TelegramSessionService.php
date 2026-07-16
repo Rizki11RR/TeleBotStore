@@ -116,17 +116,30 @@ class TelegramSessionService
 
         if ($product->variants->isEmpty()) {
             Telegram::sendMessage([
-                'chat_id' => $chatId,
-                'text'    => "Mohon maaf, produk *{$product->name}* belum memiliki varian aktif.",
-                'parse_mode' => 'Markdown',
+                'chat_id'    => $chatId,
+                'text'       => "Mohon maaf, produk <b>{$product->name}</b> belum memiliki varian aktif.",
+                'parse_mode' => 'HTML',
             ]);
             $this->sendCategories($chatId);
             return;
         }
 
         $description = $product->description ?: 'Tidak ada deskripsi.';
-        $text = "🎁 *{$product->name}*\n\n" .
-                "📝 *Deskripsi:*\n{$description}\n\n" .
+        
+        $variantLines = "";
+        foreach ($product->variants as $var) {
+            $priceFormatted = "Rp" . number_format($var->price, 0, ',', '.');
+            if ($var->original_price && $var->original_price > $var->price) {
+                $origFormatted = "<s>Rp" . number_format($var->original_price, 0, ',', '.') . "</s>";
+                $variantLines .= "• <b>{$var->name}</b>: {$priceFormatted} (Promo! Harga asli: {$origFormatted})\n";
+            } else {
+                $variantLines .= "• <b>{$var->name}</b>: {$priceFormatted}\n";
+            }
+        }
+
+        $text = "🎁 <b>{$product->name}</b>\n\n" .
+                "📝 <b>Deskripsi:</b>\n{$description}\n\n" .
+                "💵 <b>Daftar Varian & Harga:</b>\n{$variantLines}\n" .
                 "Silakan pilih varian produk di bawah ini:";
 
         $keyboard = [];
@@ -138,7 +151,7 @@ class TelegramSessionService
         Telegram::sendMessage([
             'chat_id'      => $chatId,
             'text'         => $text,
-            'parse_mode'   => 'Markdown',
+            'parse_mode'   => 'HTML',
             'reply_markup' => json_encode([
                 'keyboard'          => $keyboard,
                 'resize_keyboard'   => true,

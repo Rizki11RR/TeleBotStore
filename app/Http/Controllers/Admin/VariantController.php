@@ -30,17 +30,18 @@ class VariantController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'name'       => 'required|string|max:150',
-            'price'      => 'required|numeric|min:0',
-            'stock'      => 'integer|min:-1',
-            'is_active'  => 'boolean',
+            'product_id'     => 'required|exists:products,id',
+            'name'           => 'required|string|max:150',
+            'price'          => 'required|numeric|min:0',
+            'original_price' => 'nullable|numeric|min:0',
+            'stock'          => 'integer|min:-1',
+            'is_active'      => 'boolean',
         ]);
 
         $variant = ProductVariant::create($validated);
         $this->logService->log('variant.create', "Membuat varian: {$variant->name}", $variant);
 
-        return redirect()->route('admin.variants.index')
+        return redirect()->route('admin.products.show', $variant->product_id)
             ->with('success', "Varian '{$variant->name}' berhasil dibuat.");
     }
 
@@ -59,27 +60,29 @@ class VariantController extends Controller
     public function update(Request $request, ProductVariant $variant): RedirectResponse
     {
         $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'name'       => 'required|string|max:150',
-            'price'      => 'required|numeric|min:0',
-            'stock'      => 'integer|min:-1',
-            'is_active'  => 'boolean',
+            'product_id'     => 'required|exists:products,id',
+            'name'           => 'required|string|max:150',
+            'price'          => 'required|numeric|min:0',
+            'original_price' => 'nullable|numeric|min:0',
+            'stock'          => 'integer|min:-1',
+            'is_active'      => 'boolean',
         ]);
 
         $variant->update($validated);
         $this->logService->log('variant.update', "Memperbarui varian: {$variant->name}", $variant);
 
-        return redirect()->route('admin.variants.index')
+        return redirect()->route('admin.products.show', $variant->product_id)
             ->with('success', "Varian '{$variant->name}' berhasil diperbarui.");
     }
 
     public function destroy(ProductVariant $variant): RedirectResponse
     {
         $name = $variant->name;
+        $productId = $variant->product_id;
         $variant->delete();
         $this->logService->log('variant.delete', "Menghapus varian: {$name}", $variant);
 
-        return redirect()->route('admin.variants.index')
+        return redirect()->route('admin.products.show', $productId)
             ->with('success', "Varian '{$name}' berhasil dihapus.");
     }
 }

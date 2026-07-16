@@ -15,15 +15,17 @@ class ProductVariant extends Model
         'product_id',
         'name',
         'price',
+        'original_price',
         'stock',
         'is_active',
     ];
 
     /** @var array<string, string> */
     protected $casts = [
-        'price'     => 'decimal:2',
-        'stock'     => 'integer',
-        'is_active' => 'boolean',
+        'price'          => 'decimal:2',
+        'original_price' => 'decimal:2',
+        'stock'          => 'integer',
+        'is_active'      => 'boolean',
     ];
 
     /*
@@ -42,6 +44,11 @@ class ProductVariant extends Model
         return $this->hasOne(DigitalFile::class);
     }
 
+    public function accounts()
+    {
+        return $this->hasMany(ProductVariantAccount::class);
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class);
@@ -57,6 +64,12 @@ class ProductVariant extends Model
     public function getFormattedPriceAttribute(): string
     {
         return 'Rp' . number_format($this->price, 0, ',', '.');
+    }
+
+    /** Harga asli terformat dalam Rupiah */
+    public function getFormattedOriginalPriceAttribute(): ?string
+    {
+        return $this->original_price ? 'Rp' . number_format($this->original_price, 0, ',', '.') : null;
     }
 
     /** Cek stok tersedia (stock -1 = unlimited) */

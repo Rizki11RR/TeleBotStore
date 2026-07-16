@@ -38,6 +38,10 @@
                                 <span class="badge bg-light-primary text-primary">{{ $product->category->name }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <span>Tipe Produk</span>
+                                <span class="badge bg-light-info text-info">{{ $product->type === 'account' ? 'Akun (Stok Kredensial)' : 'Ebook (File)' }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                 <span>Urutan Tampil</span>
                                 <strong>{{ $product->sort_order }}</strong>
                             </li>
@@ -89,7 +93,12 @@
                                     @forelse ($product->variants as $var)
                                         <tr>
                                             <td class="fw-bold">{{ $var->name }}</td>
-                                            <td>Rp{{ number_format($var->price, 0, ',', '.') }}</td>
+                                            <td>
+                                                <div>Rp{{ number_format($var->price, 0, ',', '.') }}</div>
+                                                @if ($var->original_price && $var->original_price > $var->price)
+                                                    <small class="text-muted"><del>Rp{{ number_format($var->original_price, 0, ',', '.') }}</del></small>
+                                                @endif
+                                            </td>
                                             <td>
                                                 @if ($var->stock == -1)
                                                     <span class="badge bg-light-info text-info">Unlimited</span>
@@ -98,12 +107,18 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if ($var->digitalFile)
-                                                    <span class="badge bg-light-success text-success">
-                                                        {{ strtoupper($var->digitalFile->delivery_type->value) }}
-                                                    </span>
+                                                @if ($product->type === 'account')
+                                                    <a href="{{ route('admin.variants.accounts.index', $var) }}" class="btn btn-sm btn-light-primary fw-bold">
+                                                        <i class="bi bi-key-fill me-1"></i> Stok Akun ({{ $var->accounts->where('is_sold', false)->count() }})
+                                                    </a>
                                                 @else
-                                                    <span class="badge bg-light-warning text-warning">Belum Ada File</span>
+                                                    @if ($var->digitalFile)
+                                                        <span class="badge bg-light-success text-success">
+                                                            {{ strtoupper($var->digitalFile->delivery_type->value) }}
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-light-warning text-warning">Belum Ada File</span>
+                                                    @endif
                                                 @endif
                                             </td>
                                             <td>
@@ -115,9 +130,16 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex gap-2">
-                                                    <a href="{{ route('admin.variants.edit', $var) }}" class="btn btn-warning btn-sm">
+                                                    <a href="{{ route('admin.variants.edit', $var) }}" class="btn btn-warning btn-sm" title="Edit Varian">
                                                         <i class="bi bi-pencil-fill"></i>
                                                     </a>
+                                                    <form action="{{ route('admin.variants.destroy', $var) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus varian ini?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm" title="Hapus Varian">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </td>
                                         </tr>

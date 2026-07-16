@@ -78,4 +78,22 @@ class CategoryController extends Controller
         return redirect()->route('admin.categories.index')
             ->with('success', "Kategori '{$name}' berhasil dihapus.");
     }
+
+    public function reorder(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'integer|exists:categories,id',
+        ]);
+
+        $ids = $request->input('ids');
+        foreach ($ids as $index => $id) {
+            Category::withTrashed()->where('id', $id)->update(['sort_order' => $index + 1]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Urutan kategori berhasil diperbarui.',
+        ]);
+    }
 }

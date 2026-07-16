@@ -13,6 +13,7 @@ class Product extends Model
     /** @var list<string> */
     protected $fillable = [
         'category_id',
+        'type',
         'name',
         'slug',
         'description',
