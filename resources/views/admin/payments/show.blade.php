@@ -7,7 +7,7 @@
     <div class="page-title">
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
-                <h3>Verifikasi Pembayaran: {{ $payment->order->invoice_number }}</h3>
+                <h3>Verifikasi Pembayaran: {{ $payment->order?->invoice_number ?? '[Pesanan Dihapus]' }}</h3>
                 <p class="text-subtitle text-muted">Periksa kesesuaian nominal dan bukti transfer QRIS pembeli.</p>
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
@@ -36,18 +36,37 @@
                             <tr>
                                 <th>Invoice</th>
                                 <td>
-                                    <a href="{{ route('admin.orders.show', $payment->order) }}" class="fw-bold">
-                                        {{ $payment->order->invoice_number }}
-                                    </a>
+                                    @if ($payment->order)
+                                        <a href="{{ route('admin.orders.show', $payment->order) }}" class="fw-bold">
+                                            {{ $payment->order->invoice_number }}
+                                            @if ($payment->order->trashed())
+                                                <span class="text-danger small">(Dihapus)</span>
+                                            @endif
+                                        </a>
+                                    @else
+                                        <span class="text-muted fw-bold">[Pesanan Dihapus]</span>
+                                    @endif
                                 </td>
                             </tr>
                             <tr>
                                 <th>User Telegram</th>
-                                <td>{{ $payment->order->telegramUser->full_name }}</td>
+                                <td>
+                                    @if ($payment->order && $payment->order->telegramUser)
+                                        {{ $payment->order->telegramUser->full_name }}
+                                    @else
+                                        <span class="text-muted">N/A</span>
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <th>Varian Produk</th>
-                                <td>{{ $payment->order->productVariant->product->name }} - {{ $payment->order->productVariant->name }}</td>
+                                <td>
+                                    @if ($payment->order && $payment->order->productVariant)
+                                        {{ $payment->order->productVariant->product->name }} - {{ $payment->order->productVariant->name }}
+                                    @else
+                                        <span class="text-muted">N/A</span>
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <th>Nominal yang Harus Dibayar</th>

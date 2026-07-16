@@ -61,11 +61,24 @@
                             @forelse ($payments as $payment)
                                 <tr>
                                     <td>
-                                        <a href="{{ route('admin.orders.show', $payment->order) }}" class="fw-bold">
-                                            {{ $payment->order->invoice_number }}
-                                        </a>
+                                        @if ($payment->order)
+                                            <a href="{{ route('admin.orders.show', $payment->order) }}" class="fw-bold">
+                                                {{ $payment->order->invoice_number }}
+                                                @if ($payment->order->trashed())
+                                                    <span class="text-danger small">(Dihapus)</span>
+                                                @endif
+                                            </a>
+                                        @else
+                                            <span class="text-muted fw-bold">[Pesanan Dihapus]</span>
+                                        @endif
                                     </td>
-                                    <td>{{ $payment->order->telegramUser->full_name }}</td>
+                                    <td>
+                                        @if ($payment->order && $payment->order->telegramUser)
+                                            {{ $payment->order->telegramUser->full_name }}
+                                        @else
+                                            <span class="text-muted">N/A</span>
+                                        @endif
+                                    </td>
                                     <td class="fw-bold">Rp{{ number_format($payment->amount, 0, ',', '.') }}</td>
                                     <td>
                                         <span class="{{ $payment->status->badge() }}">
