@@ -93,8 +93,8 @@
                                             </td>
                                             <td class="text-center">
                                                 @if (!$acc->is_sold)
-                                                    <form action="{{ route('admin.variants.accounts.destroy', [$variant, $acc]) }}" method="POST" 
-                                                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus kredensial ini?')">
+                                                    <form action="{{ route('admin.variants.accounts.destroy', [$variant, $acc]) }}" method="POST" class="delete-form" 
+                                                          data-confirm="Apakah Anda yakin ingin menghapus kredensial ini?">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-sm rounded-circle px-2" title="Hapus Kredensial">

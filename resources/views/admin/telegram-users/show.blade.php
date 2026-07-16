@@ -64,20 +64,28 @@
                         </ul>
 
                         <div class="d-flex gap-2 mt-4 justify-content-end">
-                            <form action="{{ route('admin.telegram-users.toggle-block', $telegramUser) }}" method="POST">
-                                @csrf
-                                @method('PATCH')
-                                @if ($telegramUser->is_blocked)
+                            @if ($telegramUser->is_blocked)
+                                <form action="{{ route('admin.telegram-users.toggle-block', $telegramUser) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
                                     <button type="submit" class="btn btn-success btn-sm">
                                         <i class="bi bi-unlock-fill me-1"></i> Buka Blokir
                                     </button>
-                                @else
-                                    <button type="submit" class="btn btn-danger btn-sm"
-                                            onsubmit="return confirm('Apakah Anda yakin ingin memblokir user ini? Bot tidak akan merespon perintah user.')">
+                                </form>
+                            @else
+                                <form action="{{ route('admin.telegram-users.toggle-block', $telegramUser) }}" method="POST" class="confirm-form"
+                                      data-confirm="Apakah Anda yakin ingin memblokir user ini? Bot tidak akan merespon perintah user."
+                                      data-confirm-title="Blokir User Telegram"
+                                      data-confirm-button="Ya, Blokir!"
+                                      data-confirm-color="#dc3545"
+                                      data-confirm-icon="warning">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-danger btn-sm">
                                         <i class="bi bi-slash-circle-fill me-1"></i> Blokir User
                                     </button>
-                                @endif
-                            </form>
+                                </form>
+                            @endif
                             <a href="{{ route('admin.telegram-users.index') }}" class="btn btn-secondary btn-sm">Kembali</a>
                         </div>
                     </div>

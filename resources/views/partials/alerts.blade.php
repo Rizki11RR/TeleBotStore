@@ -1,46 +1,61 @@
-{{-- Flash Messages (Session Alerts) --}}
-@if (session('success'))
-    <div class="alert alert-success alert-dismissible fade show mx-4" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
+{{-- Toast Alert Notifications --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @if (session('success'))
+            Toastify({
+                text: "{{ session('success') }}",
+                duration: 3500,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#4fbe87",
+            }).showToast();
+        @endif
 
-@if (session('error'))
-    <div class="alert alert-danger alert-dismissible fade show mx-4" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
+        @if (session('error'))
+            Toastify({
+                text: "{{ session('error') }}",
+                duration: 4000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#f3616d",
+            }).showToast();
+        @endif
 
-@if (session('warning'))
-    <div class="alert alert-warning alert-dismissible fade show mx-4" role="alert">
-        <i class="bi bi-exclamation-circle-fill me-2"></i>
-        {{ session('warning') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
+        @if (session('warning'))
+            Toastify({
+                text: "{{ session('warning') }}",
+                duration: 4000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#ffc107",
+            }).showToast();
+        @endif
 
-@if (session('info'))
-    <div class="alert alert-info alert-dismissible fade show mx-4" role="alert">
-        <i class="bi bi-info-circle-fill me-2"></i>
-        {{ session('info') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
+        @if (session('info'))
+            Toastify({
+                text: "{{ session('info') }}",
+                duration: 3500,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#17a2b8",
+            }).showToast();
+        @endif
 
-{{-- Validation Errors --}}
-@if ($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show mx-4" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <strong>Terdapat {{ $errors->count() }} kesalahan:</strong>
-        <ul class="mb-0 mt-1">
+        @if ($errors->any())
             @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
+                Toastify({
+                    text: "{{ $error }}",
+                    duration: 5000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#f3616d",
+                }).showToast();
             @endforeach
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
+        @endif
+    });
+</script>

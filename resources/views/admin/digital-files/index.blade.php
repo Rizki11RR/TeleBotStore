@@ -68,8 +68,8 @@
                                             <a href="{{ route('admin.digital-files.edit', $df) }}" class="btn btn-warning btn-sm">
                                                 <i class="bi bi-pencil-fill"></i>
                                             </a>
-                                            <form action="{{ route('admin.digital-files.destroy', $df) }}" method="POST"
-                                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus file digital ini?')">
+                                            <form action="{{ route('admin.digital-files.destroy', $df) }}" method="POST" class="delete-form"
+                                                  data-confirm="Apakah Anda yakin ingin menghapus file digital ini?">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">

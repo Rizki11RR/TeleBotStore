@@ -36,4 +36,11 @@ enum OrderStatus: string
             self::CANCELLED           => 'badge bg-danger',
         };
     }
+
+    /** Alias for badgeClass */
+    public function badge(): string
+    {
+        return $this->badgeClass();
+    }
 }
+

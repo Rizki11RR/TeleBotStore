@@ -133,7 +133,7 @@
                                                     <a href="{{ route('admin.variants.edit', $var) }}" class="btn btn-warning btn-sm" title="Edit Varian">
                                                         <i class="bi bi-pencil-fill"></i>
                                                     </a>
-                                                    <form action="{{ route('admin.variants.destroy', $var) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus varian ini?')">
+                                                    <form action="{{ route('admin.variants.destroy', $var) }}" method="POST" class="d-inline delete-form" data-confirm="Apakah Anda yakin ingin menghapus varian ini?">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-sm" title="Hapus Varian">

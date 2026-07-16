@@ -53,14 +53,7 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 col-12 mb-3">
-                            <label for="sort_order" class="form-label fw-bold">Urutan Tampil</label>
-                            <input type="number" id="sort_order" name="sort_order" class="form-control @error('sort_order') is-invalid @enderror"
-                                   value="{{ old('sort_order', $category->sort_order) }}" min="0">
-                            @error('sort_order')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+
 
                         <div class="col-md-6 col-12 mb-3">
                             <label class="form-label fw-bold d-block">Status Kategori</label>

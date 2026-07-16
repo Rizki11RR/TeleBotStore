@@ -30,4 +30,11 @@ enum PaymentStatus: string
             self::REJECTED => 'badge bg-danger',
         };
     }
+
+    /** Alias for badgeClass */
+    public function badge(): string
+    {
+        return $this->badgeClass();
+    }
 }
+

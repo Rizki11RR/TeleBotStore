@@ -91,8 +91,8 @@
                                             <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-info btn-sm">
                                                 <i class="bi bi-eye-fill"></i>
                                             </a>
-                                            <form action="{{ route('admin.orders.destroy', $order) }}" method="POST"
-                                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus data order ini?')">
+                                            <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" class="delete-form"
+                                                  data-confirm="Apakah Anda yakin ingin menghapus data order ini?">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">

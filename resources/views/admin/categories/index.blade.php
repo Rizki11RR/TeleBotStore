@@ -71,8 +71,8 @@
                                             <a href="{{ route('admin.categories.edit', $cat) }}" class="btn btn-warning btn-sm">
                                                 <i class="bi bi-pencil-fill"></i>
                                             </a>
-                                            <form action="{{ route('admin.categories.destroy', $cat) }}" method="POST"
-                                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori ini? Semua produk di dalamnya akan terpengaruh.')">
+                                            <form action="{{ route('admin.categories.destroy', $cat) }}" method="POST" class="delete-form"
+                                                  data-confirm="Apakah Anda yakin ingin menghapus kategori ini? Semua produk di dalamnya akan terpengaruh.">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">

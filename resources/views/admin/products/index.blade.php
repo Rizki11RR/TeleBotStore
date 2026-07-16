@@ -84,8 +84,8 @@
                                             <a href="{{ route('admin.products.edit', $prod) }}" class="btn btn-warning btn-sm">
                                                 <i class="bi bi-pencil-fill"></i>
                                             </a>
-                                            <form action="{{ route('admin.products.destroy', $prod) }}" method="POST"
-                                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini? Semua varian di dalamnya akan terpengaruh.')">
+                                            <form action="{{ route('admin.products.destroy', $prod) }}" method="POST" class="delete-form"
+                                                  data-confirm="Apakah Anda yakin ingin menghapus produk ini? Semua varian di dalamnya akan terpengaruh.">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">

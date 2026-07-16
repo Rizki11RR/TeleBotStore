@@ -77,11 +77,15 @@
 
                         @if ($payment->status === \App\Enums\PaymentStatus::WAITING)
                             <div class="d-flex gap-2 mt-4">
-                                <form action="{{ route('admin.payments.verify', $payment) }}" method="POST" class="d-inline">
+                                <form action="{{ route('admin.payments.verify', $payment) }}" method="POST" class="d-inline confirm-form"
+                                      data-confirm="Apakah Anda yakin ingin menyetujui pembayaran ini? Produk digital akan langsung dikirim."
+                                      data-confirm-title="Setujui Pembayaran"
+                                      data-confirm-button="Ya, Setujui!"
+                                      data-confirm-color="#198754"
+                                      data-confirm-icon="success">
                                     @csrf
                                     @method('PATCH')
-                                    <button type="submit" class="btn btn-success px-4"
-                                            onsubmit="return confirm('Apakah Anda yakin ingin menyetujui pembayaran ini? Produk digital akan langsung dikirim.')">
+                                    <button type="submit" class="btn btn-success px-4">
                                         <i class="bi bi-check-circle-fill me-1"></i> Setujui Pembayaran
                                     </button>
                                 </form>

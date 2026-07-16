@@ -54,8 +54,8 @@
                                                 <i class="bi bi-pencil-fill"></i>
                                             </a>
                                             @if (auth('admin')->id() !== $adm->id && $admins->total() > 1)
-                                                <form action="{{ route('admin.admins.destroy', $adm) }}" method="POST"
-                                                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun admin ini?')">
+                                                <form action="{{ route('admin.admins.destroy', $adm) }}" method="POST" class="delete-form"
+                                                      data-confirm="Apakah Anda yakin ingin menghapus akun admin ini?">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm">

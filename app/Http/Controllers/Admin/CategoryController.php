@@ -16,7 +16,7 @@ class CategoryController extends Controller
 
     public function index(): View
     {
-        $categories = Category::withTrashed()->withCount('products')->ordered()->paginate(15);
+        $categories = Category::withCount('products')->ordered()->paginate(15);
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -31,11 +31,14 @@ class CategoryController extends Controller
             'name'       => 'required|string|max:100|unique:categories,name',
             'icon'       => 'nullable|string|max:50',
             'description'=> 'nullable|string',
-            'sort_order' => 'integer|min:0',
+            'sort_order' => 'nullable|integer|min:0',
             'is_active'  => 'boolean',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
+        if (!isset($validated['sort_order']) || $validated['sort_order'] === null) {
+            $validated['sort_order'] = (Category::withTrashed()->max('sort_order') ?? 0) + 1;
+        }
         $category = Category::create($validated);
 
         $this->logService->log('category.create', "Membuat kategori: {$category->name}", $category);
@@ -55,7 +58,7 @@ class CategoryController extends Controller
             'name'        => "required|string|max:100|unique:categories,name,{$category->id}",
             'icon'        => 'nullable|string|max:50',
             'description' => 'nullable|string',
-            'sort_order'  => 'integer|min:0',
+            'sort_order'  => 'nullable|integer|min:0',
             'is_active'   => 'boolean',
         ]);
 

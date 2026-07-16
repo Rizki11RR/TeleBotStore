@@ -31,8 +31,12 @@
                         <h4 class="card-title">Form Broadcast Telegram</h4>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('admin.broadcast.send') }}" method="POST"
-                              onsubmit="return confirm('Apakah Anda yakin ingin mengirimkan pesan ini ke target terpilih?')">
+                        <form action="{{ route('admin.broadcast.send') }}" method="POST" class="confirm-form"
+                              data-confirm="Apakah Anda yakin ingin mengirimkan pesan ini ke target terpilih?"
+                              data-confirm-title="Kirim Broadcast Telegram"
+                              data-confirm-button="Ya, Kirim!"
+                              data-confirm-color="#435ebe"
+                              data-confirm-icon="question">
                             @csrf
                             <div class="mb-3">
                                 <label for="target" class="form-label fw-bold">Target Penerima <span class="text-danger">*</span></label>

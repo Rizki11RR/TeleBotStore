@@ -35,11 +35,14 @@ class ProductController extends Controller
             'type'        => 'required|in:ebook,account',
             'name'        => 'required|string|max:150|unique:products,name',
             'description' => 'nullable|string',
-            'sort_order'  => 'integer|min:0',
+            'sort_order'  => 'nullable|integer|min:0',
             'is_active'   => 'boolean',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
+        if (!isset($validated['sort_order']) || $validated['sort_order'] === null) {
+            $validated['sort_order'] = (Product::max('sort_order') ?? 0) + 1;
+        }
         $product = Product::create($validated);
 
         $this->logService->log('product.create', "Membuat produk: {$product->name}", $product);
@@ -67,7 +70,7 @@ class ProductController extends Controller
             'type'        => 'required|in:ebook,account',
             'name'        => "required|string|max:150|unique:products,name,{$product->id}",
             'description' => 'nullable|string',
-            'sort_order'  => 'integer|min:0',
+            'sort_order'  => 'nullable|integer|min:0',
             'is_active'   => 'boolean',
         ]);
 
