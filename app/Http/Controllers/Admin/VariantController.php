@@ -34,9 +34,14 @@ class VariantController extends Controller
             'name'           => 'required|string|max:150',
             'price'          => 'required|numeric|min:0',
             'original_price' => 'nullable|numeric|min:0',
-            'stock'          => 'integer|min:-1',
+            'stock'          => 'nullable|integer|min:-1',
             'is_active'      => 'boolean',
         ]);
+
+        $product = Product::findOrFail($validated['product_id']);
+        if ($product->type === 'account') {
+            $validated['stock'] = 0;
+        }
 
         $variant = ProductVariant::create($validated);
         $this->logService->log('variant.create', "Membuat varian: {$variant->name}", $variant);
@@ -64,9 +69,14 @@ class VariantController extends Controller
             'name'           => 'required|string|max:150',
             'price'          => 'required|numeric|min:0',
             'original_price' => 'nullable|numeric|min:0',
-            'stock'          => 'integer|min:-1',
+            'stock'          => 'nullable|integer|min:-1',
             'is_active'      => 'boolean',
         ]);
+
+        $product = Product::findOrFail($validated['product_id']);
+        if ($product->type === 'account') {
+            $validated['stock'] = $variant->accounts()->where('is_sold', false)->count();
+        }
 
         $variant->update($validated);
         $this->logService->log('variant.update', "Memperbarui varian: {$variant->name}", $variant);

@@ -38,7 +38,7 @@
                             <label for="product_id" class="form-label fw-bold">Pilih Produk <span class="text-danger">*</span></label>
                             <select id="product_id" name="product_id" class="form-select @error('product_id') is-invalid @enderror" required>
                                 @foreach ($products as $prod)
-                                    <option value="{{ $prod->id }}" {{ old('product_id', $variant->product_id) == $prod->id ? 'selected' : '' }}>
+                                    <option value="{{ $prod->id }}" data-type="{{ $prod->type }}" {{ old('product_id', $variant->product_id) == $prod->id ? 'selected' : '' }}>
                                         [{{ $prod->category->name }}] {{ $prod->name }}
                                     </option>
                                 @endforeach
@@ -76,13 +76,13 @@
                              @enderror
                          </div>
 
-                         <div class="col-md-6 col-12 mb-3">
+                         <div class="col-md-6 col-12 mb-3" id="stock-group">
                              <label for="stock" class="form-label fw-bold">Jumlah Stok <span class="text-danger">*</span></label>
                              <input type="number" id="stock" name="stock" class="form-control @error('stock') is-invalid @enderror"
                                     value="{{ old('stock', $variant->stock) }}" min="-1" required>
-                             <div class="form-text small">Isi `-1` untuk stok tak terbatas (unlimited). Untuk produk tipe Akun, isi manual akan ditimpa oleh jumlah kredensial yang dimasukkan.</div>
+                             <div class="form-text small" id="stock-help">Isi `-1` untuk stok tak terbatas (unlimited).</div>
                              @error('stock')
-                                 <div class="invalid-feedback">{{ $message }}</div>
+                                  <div class="invalid-feedback">{{ $message }}</div>
                              @enderror
                          </div>
 
@@ -108,4 +108,41 @@
         </div>
     </section>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const productSelect = document.getElementById('product_id');
+        const stockInput = document.getElementById('stock');
+        const stockHelp = document.getElementById('stock-help');
+
+        // Simpan nilai stok awal varian
+        const initialStock = "{{ $variant->stock }}";
+
+        function toggleStockInput() {
+            const selectedOption = productSelect.options[productSelect.selectedIndex];
+            if (!selectedOption) return;
+
+            const productType = selectedOption.getAttribute('data-type');
+            if (productType === 'account') {
+                stockInput.value = "{{ $variant->accounts()->where('is_sold', false)->count() }}";
+                stockInput.readOnly = true;
+                stockInput.classList.add('bg-light');
+                stockHelp.innerHTML = '<span class="text-primary fw-bold"><i class="bi bi-info-circle-fill"></i> Stok otomatis sinkron dengan jumlah data Akun/Kredensial yang diunggah.</span>';
+            } else {
+                if (stockInput.readOnly) {
+                    stockInput.value = initialStock == 0 ? -1 : initialStock;
+                    stockInput.readOnly = false;
+                    stockInput.classList.remove('bg-light');
+                }
+                stockHelp.innerText = 'Isi `-1` untuk stok tak terbatas (unlimited).';
+            }
+        }
+
+        productSelect.addEventListener('change', toggleStockInput);
+        // Jalankan saat load awal
+        if (productSelect.value) {
+            toggleStockInput();
+        }
+    });
+</script>
 @endsection

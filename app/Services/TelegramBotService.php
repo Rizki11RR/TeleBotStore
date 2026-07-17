@@ -350,7 +350,7 @@ class TelegramBotService
 
         // Cek apakah pesan berisi foto
         $photos = $message->getPhoto();
-        if (!$photos) {
+        if (empty($photos) || ($photos instanceof \Illuminate\Support\Collection && $photos->isEmpty())) {
             Telegram::sendMessage([
                 'chat_id' => $user->telegram_id,
                 'text'    => "⚠️ Harap kirimkan gambar/foto bukti pembayaran Anda. Jika ingin membatalkan, pilih tombol '❌ Batalkan Pesanan'.",
@@ -368,16 +368,31 @@ class TelegramBotService
             return;
         }
 
-        // Ambil foto kualitas terbaik (terakhir di array)
-        $photo = end($photos);
-        $fileId = $photo['file_id'];
+        // Ambil foto kualitas terbaik (terakhir di array atau Collection)
+        $photo = null;
+        if ($photos instanceof \Illuminate\Support\Collection) {
+            $photo = $photos->last();
+        } elseif (is_array($photos)) {
+            $photo = end($photos);
+        }
+
+        if (!$photo) {
+            Telegram::sendMessage([
+                'chat_id' => $user->telegram_id,
+                'text'    => "⚠️ Gagal membaca berkas foto. Harap kirim kembali bukti pembayaran Anda.",
+            ]);
+            return;
+        }
+
+        $fileId = is_array($photo) ? ($photo['file_id'] ?? null) : ($photo->file_id ?? $photo->get('file_id'));
 
         try {
             $file = Telegram::getFile(['file_id' => $fileId]);
             $filePathTelegram = $file->getFilePath();
 
             // Unduh file ke local storage
-            $url = "https://api.telegram.org/file/bot" . config('telegram.bots.mybot.token') . "/{$filePathTelegram}";
+            $botToken = config('telegram.bots.mybot.token') ?? env('TELEGRAM_BOT_TOKEN');
+            $url = "https://api.telegram.org/file/bot" . $botToken . "/{$filePathTelegram}";
             $fileContent = file_get_contents($url);
 
             $localFileName = "proof_{$order->invoice_number}_" . time() . ".jpg";
