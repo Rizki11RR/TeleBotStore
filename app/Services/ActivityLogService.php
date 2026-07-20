@@ -17,12 +17,13 @@ class ActivityLogService
     public function log(
         string $action,
         string $description,
-        ?object $subject = null
+        ?object $subject = null,
+        ?int $adminId = null
     ): ActivityLog {
         $request = app(Request::class);
 
         return ActivityLog::create([
-            'admin_id'     => auth('admin')->id(),
+            'admin_id'     => $adminId ?? auth('admin')->id(),
             'action'       => $action,
             'description'  => $description,
             'subject_type' => $subject ? get_class($subject) : null,

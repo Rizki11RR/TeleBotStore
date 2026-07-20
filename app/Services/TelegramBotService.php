@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Models\Admin;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Payment;
@@ -13,20 +14,34 @@ use App\Models\ProductVariant;
 use App\Models\Setting;
 use App\Models\TelegramSession;
 use App\Models\TelegramUser;
+use App\Services\ActivityLogService;
+use App\Services\DeliveryService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Telegram\Bot\Laravel\Facades\Telegram;
+use Telegram\Bot\Objects\CallbackQuery;
 use Telegram\Bot\Objects\Update;
 
 class TelegramBotService
 {
-    public function __construct(private readonly TelegramSessionService $sessionService) {}
+    public function __construct(
+        private readonly TelegramSessionService $sessionService,
+        private readonly DeliveryService $deliveryService,
+        private readonly ActivityLogService $logService
+    ) {}
 
     /**
      * Menangani update webhook Telegram.
      */
     public function handleUpdate(Update $update): void
     {
+        // Tangani callback query (tombol Inline Keyboard)
+        $callbackQuery = $update->getCallbackQuery();
+        if ($callbackQuery) {
+            $this->handleCallbackQuery($callbackQuery);
+            return;
+        }
+
         $message = $update->getMessage();
         if (!$message) {
             return;
@@ -422,13 +437,47 @@ class TelegramBotService
             $adminTelegramId = Setting::get('admin_telegram_id');
             if ($adminTelegramId) {
                 try {
-                    Telegram::sendMessage([
-                        'chat_id'    => $adminTelegramId,
-                        'text'       => "🔔 *NOTIFIKASI ORDER BARU*\n\nInvoice: `{$order->invoice_number}`\nNominal: *Rp" . number_format($order->total_price, 0, ',', '.') . "*\nUser: {$user->full_name}\n\nSegera cek Dashboard Admin untuk melakukan verifikasi bukti pembayaran.",
-                        'parse_mode' => 'Markdown',
-                    ]);
+                    $order->load(['productVariant.product']);
+                    $productName = $order->productVariant->product->name ?? 'Produk';
+                    $variantName = $order->productVariant->name ?? 'Varian';
+                    $notes = $order->notes ?: '-';
+                    $userDisplay = $user->full_name . ($user->username ? " (@{$user->username})" : '');
+
+                    $caption = "🔔 *NOTIFIKASI VERIFIKASI PEMBAYARAN*\n\n" .
+                               "Invoice: `{$order->invoice_number}`\n" .
+                               "Produk: *{$productName} - {$variantName}*\n" .
+                               "Nominal: *Rp" . number_format($order->total_price, 0, ',', '.') . "*\n" .
+                               "Pembeli: *{$userDisplay}*\n" .
+                               "Catatan: `{$notes}`\n\n" .
+                               "Silakan lakukan verifikasi bukti pembayaran di bawah:";
+
+                    $keyboard = [
+                        'inline_keyboard' => [
+                            [
+                                ['text' => '✅ Verifikasi', 'callback_data' => "verify_order_{$order->id}"],
+                                ['text' => '❌ Tolak', 'callback_data' => "reject_order_{$order->id}"],
+                            ]
+                        ]
+                    ];
+
+                    if (!empty($fileId)) {
+                        Telegram::sendPhoto([
+                            'chat_id'      => $adminTelegramId,
+                            'photo'        => $fileId,
+                            'caption'      => $caption,
+                            'parse_mode'   => 'Markdown',
+                            'reply_markup' => json_encode($keyboard),
+                        ]);
+                    } else {
+                        Telegram::sendMessage([
+                            'chat_id'      => $adminTelegramId,
+                            'text'         => $caption,
+                            'parse_mode'   => 'Markdown',
+                            'reply_markup' => json_encode($keyboard),
+                        ]);
+                    }
                 } catch (\Exception $ex) {
-                    // Abaikan jika Telegram ID admin salah / belum chat bot
+                    Log::error("Gagal mengirim notifikasi bukti bayar ke admin: " . $ex->getMessage());
                 }
             }
 
@@ -477,5 +526,223 @@ class TelegramBotService
             'text'       => $text,
             'parse_mode' => 'Markdown',
         ]);
+    }
+
+    /**
+     * Menangani callback query dari tombol Inline Keyboard Telegram Admin.
+     */
+    private function handleCallbackQuery(CallbackQuery $callbackQuery): void
+    {
+        $callbackQueryId = $callbackQuery->getId();
+        $data = $callbackQuery->getData();
+        $from = $callbackQuery->getFrom();
+        $fromTelegramId = $from->getId();
+        $adminUsername = $from->getUsername() ? "@" . $from->getUsername() : ($from->getFirstName() ?? 'Admin');
+        $message = $callbackQuery->getMessage();
+
+        if (str_starts_with($data, 'verify_order_') || str_starts_with($data, 'reject_order_')) {
+            // 1. Keamanan: Cek Otorisasi Admin
+            $adminTelegramId = Setting::get('admin_telegram_id');
+            $isAdmin = ($adminTelegramId && (string)$adminTelegramId === (string)$fromTelegramId);
+
+            if (!$isAdmin) {
+                Telegram::answerCallbackQuery([
+                    'callback_query_id' => $callbackQueryId,
+                    'text'              => '⚠️ Anda tidak memiliki akses untuk melakukan tindakan ini.',
+                    'show_alert'        => true,
+                ]);
+                return;
+            }
+
+            $isVerify = str_starts_with($data, 'verify_order_');
+            $orderId = (int) str_replace($isVerify ? 'verify_order_' : 'reject_order_', '', $data);
+
+            $order = Order::with(['payment', 'telegramUser', 'productVariant.product'])->find($orderId);
+
+            if (!$order || !$order->payment) {
+                Telegram::answerCallbackQuery([
+                    'callback_query_id' => $callbackQueryId,
+                    'text'              => '❌ Pesanan atau data pembayaran tidak ditemukan.',
+                    'show_alert'        => true,
+                ]);
+                return;
+            }
+
+            // 2. Audit & Idempotensi: Pengecekan jika status sudah diproses
+            if ($order->status !== OrderStatus::WAITING_VERIFICATION || $order->payment->status !== PaymentStatus::WAITING) {
+                $statusLabel = $order->status->label();
+                Telegram::answerCallbackQuery([
+                    'callback_query_id' => $callbackQueryId,
+                    'text'              => "⚠️ Pesanan `{$order->invoice_number}` sudah diproses sebelumnya (Status: {$statusLabel}).",
+                    'show_alert'        => true,
+                ]);
+
+                // Hapus tombol keyboard agar tidak bisa diklik lagi
+                if ($message) {
+                    try {
+                        Telegram::editMessageReplyMarkup([
+                            'chat_id'      => $message->getChat()->getId(),
+                            'message_id'   => $message->getMessageId(),
+                            'reply_markup' => json_encode(['inline_keyboard' => []]),
+                        ]);
+                    } catch (\Exception $e) {
+                        // Abaikan jika tidak bisa di-edit
+                    }
+                }
+                return;
+            }
+
+            $admin = Admin::first();
+            $payment = $order->payment;
+            $productName = $order->productVariant->product->name ?? 'Produk';
+            $variantName = $order->productVariant->name ?? 'Varian';
+            $buyerTelegramId = $order->telegramUser->telegram_id;
+
+            if ($isVerify) {
+                // UPDATE PAYMENT & ORDER
+                $payment->update([
+                    'status'      => PaymentStatus::VERIFIED,
+                    'verified_at' => now(),
+                    'verified_by' => $admin?->id,
+                ]);
+
+                $order->update([
+                    'status' => OrderStatus::PAID,
+                ]);
+
+                // SERAHKAN KE DELIVERY SERVICE UNTUK PENGIRIMAN OTOMATIS
+                $this->deliveryService->deliver($order);
+
+                // NOTIFIKASI KE PEMBELI
+                try {
+                    Telegram::sendMessage([
+                        'chat_id'    => $buyerTelegramId,
+                        'text'       => "✅ *PEMBAYARAN DIVERIFIKASI*\n\nPembayaran untuk invoice `{$order->invoice_number}` telah diverifikasi oleh admin. Terima kasih!\n\nProduk Anda telah/sedang dikirimkan di atas.",
+                        'parse_mode' => 'Markdown',
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error("Gagal mengirim notifikasi verifikasi ke pembeli: " . $e->getMessage());
+                }
+
+                // LOG AKTIVITAS AUDIT
+                $this->logService->log(
+                    'payment.verify_telegram',
+                    "Memverifikasi pembayaran via Telegram Admin untuk order {$order->invoice_number}",
+                    $payment,
+                    $admin?->id
+                );
+
+                // EDIT PESAN ADMIN TELEGRAM
+                $updatedCaption = "✅ *PESANAN TELAH DIVERIFIKASI*\n\n" .
+                                  "Invoice: `{$order->invoice_number}`\n" .
+                                  "Produk: *{$productName} - {$variantName}*\n" .
+                                  "Nominal: *Rp" . number_format($order->total_price, 0, ',', '.') . "*\n" .
+                                  "Pembeli: *{$order->telegramUser->full_name}*\n" .
+                                  "Verifikator: *{$adminUsername}*\n" .
+                                  "Waktu: " . now()->format('d/m/Y H:i:s');
+
+                if ($message) {
+                    try {
+                        $hasPhoto = !empty($message->getPhoto());
+                        if ($hasPhoto) {
+                            Telegram::editMessageCaption([
+                                'chat_id'      => $message->getChat()->getId(),
+                                'message_id'   => $message->getMessageId(),
+                                'caption'      => $updatedCaption,
+                                'parse_mode'   => 'Markdown',
+                                'reply_markup' => json_encode(['inline_keyboard' => []]),
+                            ]);
+                        } else {
+                            Telegram::editMessageText([
+                                'chat_id'      => $message->getChat()->getId(),
+                                'message_id'   => $message->getMessageId(),
+                                'text'         => $updatedCaption,
+                                'parse_mode'   => 'Markdown',
+                                'reply_markup' => json_encode(['inline_keyboard' => []]),
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error("Gagal edit message admin: " . $e->getMessage());
+                    }
+                }
+
+                Telegram::answerCallbackQuery([
+                    'callback_query_id' => $callbackQueryId,
+                    'text'              => '✅ Pesanan berhasil diverifikasi!',
+                    'show_alert'        => false,
+                ]);
+            } else {
+                // REJECT ORDER
+                $payment->update([
+                    'status'           => PaymentStatus::REJECTED,
+                    'rejection_reason' => "Ditolak via Telegram Admin oleh {$adminUsername}",
+                    'verified_at'      => now(),
+                    'verified_by'      => $admin?->id,
+                ]);
+
+                $order->update([
+                    'status' => OrderStatus::WAITING_PAYMENT,
+                ]);
+
+                // NOTIFIKASI KE PEMBELI
+                try {
+                    Telegram::sendMessage([
+                        'chat_id'    => $buyerTelegramId,
+                        'text'       => "❌ *PEMBAYARAN DITOLAK*\n\nPembayaran untuk invoice `{$order->invoice_number}` ditolak oleh admin.\n\nSilakan periksa kembali bukti transfer Anda dan kirimkan ulang bukti pembayaran yang valid.",
+                        'parse_mode' => 'Markdown',
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error("Gagal mengirim notifikasi penolakan ke pembeli: " . $e->getMessage());
+                }
+
+                // LOG AKTIVITAS AUDIT
+                $this->logService->log(
+                    'payment.reject_telegram',
+                    "Menolak pembayaran via Telegram Admin untuk order {$order->invoice_number}",
+                    $payment,
+                    $admin?->id
+                );
+
+                // EDIT PESAN ADMIN TELEGRAM
+                $updatedCaption = "❌ *PESANAN TELAH DITOLAK*\n\n" .
+                                  "Invoice: `{$order->invoice_number}`\n" .
+                                  "Produk: *{$productName} - {$variantName}*\n" .
+                                  "Nominal: *Rp" . number_format($order->total_price, 0, ',', '.') . "*\n" .
+                                  "Pembeli: *{$order->telegramUser->full_name}*\n" .
+                                  "Ditolak oleh: *{$adminUsername}*\n" .
+                                  "Waktu: " . now()->format('d/m/Y H:i:s');
+
+                if ($message) {
+                    try {
+                        $hasPhoto = !empty($message->getPhoto());
+                        if ($hasPhoto) {
+                            Telegram::editMessageCaption([
+                                'chat_id'      => $message->getChat()->getId(),
+                                'message_id'   => $message->getMessageId(),
+                                'caption'      => $updatedCaption,
+                                'parse_mode'   => 'Markdown',
+                                'reply_markup' => json_encode(['inline_keyboard' => []]),
+                            ]);
+                        } else {
+                            Telegram::editMessageText([
+                                'chat_id'      => $message->getChat()->getId(),
+                                'message_id'   => $message->getMessageId(),
+                                'text'         => $updatedCaption,
+                                'parse_mode'   => 'Markdown',
+                                'reply_markup' => json_encode(['inline_keyboard' => []]),
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error("Gagal edit message admin: " . $e->getMessage());
+                    }
+                }
+
+                Telegram::answerCallbackQuery([
+                    'callback_query_id' => $callbackQueryId,
+                    'text'              => '❌ Pesanan telah ditolak.',
+                    'show_alert'        => false,
+                ]);
+            }
+        }
     }
 }
