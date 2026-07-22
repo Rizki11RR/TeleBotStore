@@ -26,13 +26,13 @@ class PaymentHandler
     public function verify(CallbackQuery $callbackQuery, int $orderId): bool
     {
         $from = $callbackQuery->getFrom();
-        $fromTelegramId = $from->getId();
+        $fromTelegramId = (string)$from->getId();
         $adminUsername = $from->getUsername() ? "@" . $from->getUsername() : ($from->getFirstName() ?? 'Admin');
         $message = $callbackQuery->getMessage();
 
         // 1. Keamanan: Cek Otorisasi Admin
         $adminTelegramId = Setting::get('admin_telegram_id');
-        $isAdmin = ($adminTelegramId && (string)$adminTelegramId === (string)$fromTelegramId);
+        $isAdmin = ($adminTelegramId && (string)$adminTelegramId === $fromTelegramId);
 
         if (!$isAdmin) {
             $this->sender->answerCallback(
@@ -65,7 +65,7 @@ class PaymentHandler
 
             // Hapus tombol keyboard agar tidak bisa diklik lagi
             if ($message) {
-                $this->sender->editReplyMarkup($message->getChat()->getId(), $message->getMessageId(), ['inline_keyboard' => []]);
+                $this->sender->editReplyMarkup((string)$message->getChat()->getId(), $message->getMessageId(), ['inline_keyboard' => []]);
             }
             return false;
         }
@@ -119,7 +119,7 @@ class PaymentHandler
             $hasPhoto = !empty($message->getPhoto());
             if ($hasPhoto) {
                 $this->sender->editCaption(
-                    $message->getChat()->getId(),
+                    (string)$message->getChat()->getId(),
                     $message->getMessageId(),
                     $updatedCaption,
                     ['inline_keyboard' => []],
@@ -127,7 +127,7 @@ class PaymentHandler
                 );
             } else {
                 $this->sender->editText(
-                    $message->getChat()->getId(),
+                    (string)$message->getChat()->getId(),
                     $message->getMessageId(),
                     $updatedCaption,
                     ['inline_keyboard' => []],
@@ -151,13 +151,13 @@ class PaymentHandler
     public function reject(CallbackQuery $callbackQuery, int $orderId): bool
     {
         $from = $callbackQuery->getFrom();
-        $fromTelegramId = $from->getId();
+        $fromTelegramId = (string)$from->getId();
         $adminUsername = $from->getUsername() ? "@" . $from->getUsername() : ($from->getFirstName() ?? 'Admin');
         $message = $callbackQuery->getMessage();
 
         // 1. Keamanan: Cek Otorisasi Admin
         $adminTelegramId = Setting::get('admin_telegram_id');
-        $isAdmin = ($adminTelegramId && (string)$adminTelegramId === (string)$fromTelegramId);
+        $isAdmin = ($adminTelegramId && (string)$adminTelegramId === $fromTelegramId);
 
         if (!$isAdmin) {
             $this->sender->answerCallback(
@@ -188,7 +188,7 @@ class PaymentHandler
             );
 
             if ($message) {
-                $this->sender->editReplyMarkup($message->getChat()->getId(), $message->getMessageId(), ['inline_keyboard' => []]);
+                $this->sender->editReplyMarkup((string)$message->getChat()->getId(), $message->getMessageId(), ['inline_keyboard' => []]);
             }
             return false;
         }
@@ -240,7 +240,7 @@ class PaymentHandler
             $hasPhoto = !empty($message->getPhoto());
             if ($hasPhoto) {
                 $this->sender->editCaption(
-                    $message->getChat()->getId(),
+                    (string)$message->getChat()->getId(),
                     $message->getMessageId(),
                     $updatedCaption,
                     ['inline_keyboard' => []],
@@ -248,7 +248,7 @@ class PaymentHandler
                 );
             } else {
                 $this->sender->editText(
-                    $message->getChat()->getId(),
+                    (string)$message->getChat()->getId(),
                     $message->getMessageId(),
                     $updatedCaption,
                     ['inline_keyboard' => []],

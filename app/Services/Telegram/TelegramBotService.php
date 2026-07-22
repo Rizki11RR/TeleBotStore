@@ -39,7 +39,7 @@ class TelegramBotService
 
         // Upsert Telegram User (Null-safe first_name)
         $user = TelegramUser::updateOrCreate(
-            ['telegram_id' => $from->getId()],
+            ['telegram_id' => (string)$from->getId()],
             [
                 'username'   => $from->getUsername(),
                 'first_name' => $from->getFirstName() ?: ($from->getUsername() ?: 'User'),
