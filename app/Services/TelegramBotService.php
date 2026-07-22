@@ -57,7 +57,7 @@ class TelegramBotService
             ['telegram_id' => $from->getId()],
             [
                 'username'   => $from->getUsername(),
-                'first_name' => $from->getFirstName(),
+                'first_name' => $from->getFirstName() ?: ($from->getUsername() ?: 'User'),
                 'last_name'  => $from->getLastName(),
             ]
         );
@@ -154,11 +154,14 @@ class TelegramBotService
             return;
         }
 
-        // Temukan kategori berdasarkan nama (abaikan emoji ikon di depannya)
-        $cleanName = preg_replace('/^\P{L}+/u', '', $text); // Hapus emoji di awal nama
-        $cleanName = trim($cleanName);
-
-        $category = Category::where('name', $cleanName)->active()->first();
+        // Temukan kategori berdasarkan nama (pencocokan persis tombol atau nama bersih)
+        $categories = Category::active()->get();
+        $category = $categories->first(function ($cat) use ($text) {
+            $icon = $cat->icon ?: '📁';
+            return $text === "{$icon} {$cat->name}" 
+                || $text === $cat->name 
+                || trim(preg_replace('/^[^\p{L}\p{N}]+/u', '', $text)) === $cat->name;
+        });
 
         if (!$category) {
             Telegram::sendMessage([
@@ -185,11 +188,13 @@ class TelegramBotService
             return;
         }
 
-        $cleanName = preg_replace('/^🎁\s*/', '', $text);
-        $cleanName = trim($cleanName);
-
         $categoryId = $session->data['category_id'] ?? null;
-        $product = Product::where('name', $cleanName)->where('category_id', $categoryId)->active()->first();
+        $products = Product::where('category_id', $categoryId)->active()->get();
+        $product = $products->first(function ($prod) use ($text) {
+            return $text === "🎁 {$prod->name}" 
+                || $text === $prod->name 
+                || trim(preg_replace('/^🎁\s*/u', '', $text)) === $prod->name;
+        });
 
         if (!$product) {
             Telegram::sendMessage([

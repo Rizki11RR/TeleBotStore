@@ -18,10 +18,17 @@ class WebhookController extends Controller
      */
     public function handle(Request $request): Response
     {
-        $update = Telegram::commandsHandler(true);
+        try {
+            $update = Telegram::commandsHandler(true);
 
-        if ($update) {
-            $this->botService->handleUpdate($update);
+            if ($update) {
+                $this->botService->handleUpdate($update);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Telegram Webhook Error: " . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
         }
 
         return response('OK', 200);
