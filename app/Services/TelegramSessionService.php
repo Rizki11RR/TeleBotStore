@@ -15,7 +15,7 @@ class TelegramSessionService
     /**
      * Kirim menu utama ke user.
      */
-    public function sendMenu(int $chatId): void
+    public function sendMenu(string|int $chatId): void
     {
         $storeName = Setting::get('store_name', 'Nexora Digital');
         $welcomeMsg = Setting::get('bot_welcome_message', "Halo! Selamat datang di *{$storeName}* 🛍️\n\nSilakan pilih menu:");
@@ -39,7 +39,7 @@ class TelegramSessionService
     /**
      * Kirim daftar kategori.
      */
-    public function sendCategories(int $chatId): void
+    public function sendCategories(string|int $chatId): void
     {
         $categories = Category::active()->ordered()->get();
 
@@ -73,7 +73,7 @@ class TelegramSessionService
     /**
      * Kirim daftar produk berdasarkan kategori.
      */
-    public function sendProducts(int $chatId, Category $category): void
+    public function sendProducts(string|int $chatId, Category $category): void
     {
         $products = Product::where('category_id', $category->id)->active()->ordered()->get();
 
@@ -108,7 +108,7 @@ class TelegramSessionService
     /**
      * Kirim detail produk & pilihan varian.
      */
-    public function sendProductDetails(int $chatId, Product $product): void
+    public function sendProductDetails(string|int $chatId, Product $product): void
     {
         $product->load(['variants' => function ($q) {
             $q->active();
@@ -163,7 +163,7 @@ class TelegramSessionService
     /**
      * Kirim invoice & QRIS untuk pembayaran.
      */
-    public function sendQrisPayment(int $chatId, Order $order): void
+    public function sendQrisPayment(string|int $chatId, Order $order): void
     {
         $qrisImage = Setting::get('qris_image_path');
         $accountName = Setting::get('qris_account_name', 'Nexora Digital');

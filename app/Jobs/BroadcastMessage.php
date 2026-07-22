@@ -23,7 +23,7 @@ class BroadcastMessage implements ShouldQueue
     public int $tries = 1;
 
     public function __construct(
-        private readonly int $chatId,
+        private readonly string|int $chatId,
         private readonly string $message
     ) {}
 
