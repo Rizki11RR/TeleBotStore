@@ -35,6 +35,18 @@ class TelegramBotService
      */
     public function handleUpdate(Update $update): void
     {
+        try {
+            $this->processUpdate($update);
+        } catch (\Throwable $e) {
+            Log::error('handleUpdate fatal error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+        }
+    }
+
+    private function processUpdate(Update $update): void
+    {
         // Tangani callback query (tombol Inline Keyboard)
         $callbackQuery = $update->getCallbackQuery();
         if ($callbackQuery) {
@@ -144,7 +156,7 @@ class TelegramBotService
                 $this->sessionService->sendMenu($user->telegram_id);
                 break;
         }
-    }
+    } // end processUpdate
 
     private function handleChooseCategory(TelegramUser $user, TelegramSession $session, string $text): void
     {
