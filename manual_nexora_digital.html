@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Manual User — Nexora Digital</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', Arial, sans-serif; font-size: 13px; color: #1a1a2e; line-height: 1.7; padding: 40px 60px; }
+  h1 { font-size: 26px; color: #1a1a2e; border-bottom: 3px solid #4f46e5; padding-bottom: 10px; margin: 30px 0 8px; }
+  h2 { font-size: 19px; color: #4f46e5; border-left: 4px solid #4f46e5; padding-left: 10px; margin: 28px 0 10px; page-break-after: avoid; }
+  h3 { font-size: 15px; color: #1a1a2e; margin: 20px 0 8px; }
+  h4 { font-size: 13px; color: #555; margin: 14px 0 6px; }
+  p { margin: 8px 0; }
+  strong { color: #1a1a2e; }
+  code { background: #f0f0f7; border: 1px solid #ddd; border-radius: 3px; padding: 1px 5px; font-family: 'Courier New', monospace; font-size: 12px; color: #c7254e; }
+  pre { background: #1e1e2e; color: #cdd6f4; border-radius: 6px; padding: 14px; margin: 12px 0; overflow-x: auto; }
+  pre code { background: none; border: none; color: #cdd6f4; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+  th { background: #4f46e5; color: white; padding: 8px 12px; text-align: left; }
+  td { border: 1px solid #ddd; padding: 7px 12px; }
+  tr:nth-child(even) td { background: #f8f8ff; }
+  blockquote { background: #eef2ff; border-left: 4px solid #4f46e5; padding: 10px 16px; margin: 10px 0; border-radius: 0 6px 6px 0; color: #333; }
+  ul, ol { padding-left: 22px; margin: 8px 0; }
+  li { margin: 4px 0; }
+  hr { border: none; border-top: 1px solid #e0e0f0; margin: 20px 0; }
+  .cover { text-align: center; padding: 80px 0 60px; page-break-after: always; }
+  .cover h1 { border: none; font-size: 32px; color: #4f46e5; }
+  .cover .subtitle { font-size: 16px; color: #666; margin-top: 8px; }
+  .cover .meta { margin-top: 40px; font-size: 13px; color: #888; }
+  .cover .badge { display: inline-block; background: #4f46e5; color: white; padding: 6px 18px; border-radius: 20px; font-size: 13px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="cover">
+  <h1>⚡ Nexora Digital</h1>
+  <div class="subtitle">Manual User — Sistem Toko Digital Otomatis via Telegram Bot</div>
+  <div class="badge">Versi 1.0</div>
+  <div class="meta">Terakhir Diperbarui: Juli 2026</div>
+</div>
+<h1>📖 Manual User — Nexora Digital</h1>
+<h3>Sistem Toko Digital Otomatis via Telegram Bot</h3>
+<p><strong>Versi Dokumen:</strong> 1.0  
+<strong>Terakhir Diperbarui:</strong> Juli 2026</p>
+<hr>
+<h2>Daftar Isi</h2>
+<ol><li>[Pengenalan Sistem](#1-pengenalan-sistem)</li>
+<li>[Alur Bisnis Lengkap](#2-alur-bisnis-lengkap)</li>
+<li>[Panduan Admin — Setup Awal](#3-panduan-admin--setup-awal)</li>
+<li>[Manajemen Katalog](#4-manajemen-katalog)</li>
+<li>[Manajemen Transaksi](#5-manajemen-transaksi)</li>
+<li>[Manajemen Telegram](#6-manajemen-telegram)</li>
+<li>[Pengaturan Sistem](#7-pengaturan-sistem)</li>
+<li>[Panduan Pembeli via Bot Telegram](#8-panduan-pembeli-via-bot-telegram)</li>
+<li>[Referensi Status](#9-referensi-status)</li>
+</ol>
+<hr>
+<h2>1. Pengenalan Sistem</h2>
+<p><strong>Nexora Digital</strong> adalah platform toko digital otomatis yang mengintegrasikan <strong>Dashboard Admin berbasis Web</strong> dengan <strong>Bot Telegram</strong>. Sistem ini memungkinkan penjualan produk digital — seperti akun premium dan e-book/file digital — secara otomatis 24 jam tanpa harus memproses setiap transaksi secara manual.</p>
+<h3>Komponen Utama</h3>
+<table><tr><th>Komponen</th><th>Fungsi</th></tr><tr><td><strong>Dashboard Admin (Web)</strong></td><td>Mengelola produk, memantau transaksi, verifikasi pembayaran</td></tr><tr><td><strong>Bot Telegram</strong></td><td>Melayani pembeli: browsing katalog, pemesanan, pembayaran</td></tr><tr><td><strong>Sistem Pengiriman Otomatis</strong></td><td>Mengirimkan produk digital langsung ke pembeli via Telegram setelah pembayaran terverifikasi</td></tr></table>
+<hr>
+<h2>2. Alur Bisnis Lengkap</h2>
+<pre><code>[ADMIN] Setup Produk & QRIS
+        ↓
+[PEMBELI] Buka Bot Telegram → Browse Katalog
+        ↓
+[PEMBELI] Pilih Kategori → Pilih Produk → Pilih Varian
+        ↓
+[PEMBELI] Input Catatan Pesanan (misal: username, email)
+        ↓
+[PEMBELI] Konfirmasi & Terima Instruksi Pembayaran (QRIS)
+        ↓
+[PEMBELI] Transfer & Upload Foto Bukti Pembayaran
+        ↓
+[BOT] Kirim Notifikasi ke Telegram Admin
+      (foto bukti + detail pesanan + tombol ✅ Verifikasi / ❌ Tolak)
+        ↓
+[ADMIN] Klik ✅ Verifikasi di Telegram Admin
+        ↓
+[BOT] Kirim Produk Otomatis ke Pembeli:
+      - Akun: kirim username & password langsung via Telegram
+      - File: kirim file digital (.pdf, .zip, dll) via Telegram
+      - Teks: kirim teks berisi link/lisensi via Telegram
+      - Manual: admin dikirim notifikasi untuk tindak lanjut manual
+        ↓
+[SELESAI] Pesanan berstatus COMPLETED</code></pre>
+<h3>Catatan Penting</h3>
+<ul><li>Jika admin mengklik <strong>❌ Tolak</strong>, pembeli akan mendapat notifikasi bahwa bukti pembayaran ditolak dan diminta mengunggah ulang.</li>
+<li>Sistem memiliki proteksi <strong>anti-klik ganda</strong>: jika tombol verifikasi diklik lebih dari sekali, pesanan yang sudah diproses tidak akan diproses ulang.</li>
+</ul>
+<hr>
+<h2>3. Panduan Admin — Setup Awal</h2>
+<p>Berikut adalah langkah-langkah yang harus dilakukan admin <strong>sebelum</strong> sistem dapat menerima transaksi dari pembeli.</p>
+<h3>3.1 Login ke Dashboard</h3>
+<ol><li>Buka URL dashboard: <code>https://domain-anda/admin/login</code></li>
+<li>Masukkan <strong>Email</strong> dan <strong>Password</strong> admin.</li>
+<li>Klik tombol <strong>Login</strong>.</li>
+</ol>
+<hr>
+<h3>3.2 Konfigurasi Pengaturan Umum (<code>Settings</code>)</h3>
+<p>Masuk ke menu <strong>Settings</strong> (ikon ⚙️ di sidebar).</p>
+<table><tr><th>Kolom</th><th>Penjelasan</th></tr><tr><td><strong>Nama Toko</strong></td><td>Nama toko yang ditampilkan di bot Telegram</td></tr><tr><td><strong>Deskripsi Toko</strong></td><td>Deskripsi singkat toko</td></tr><tr><td><strong>Telegram ID Admin</strong></td><td>ID Telegram akun admin untuk menerima notifikasi pembayaran <em>(wajib diisi)</em></td></tr><tr><td><strong>Pesan Sambutan Bot</strong></td><td>Teks yang dikirim bot saat pembeli pertama kali mengetik <code>/start</code></td></tr><tr><td><strong>Pesan Bantuan Bot</strong></td><td>Teks balasan bot saat pembeli menekan tombol ❓ Bantuan</td></tr><tr><td><strong>Info Cara Pembayaran</strong></td><td>Teks petunjuk pembayaran yang dikirim ke pembeli</td></tr><tr><td><strong>Kontak Admin</strong></td><td>Teks berisi cara menghubungi admin, dikirim via tombol ☎️ Hubungi Admin</td></tr></table>
+<blockquote><strong>Cara Mendapatkan Telegram ID Admin:</strong></blockquote>
+<blockquote>1. Buka aplikasi Telegram dan cari bot <strong><code>@userinfobot</code></strong>.</blockquote>
+<blockquote>2. Ketik <code>/start</code>, bot akan membalas dengan angka ID Telegram Anda.</blockquote>
+<blockquote>3. Salin angka tersebut dan isikan di kolom <strong>Telegram ID Admin</strong>.</blockquote>
+<blockquote> </blockquote>
+<blockquote><strong>Penting:</strong> Pastikan akun Telegram admin sudah pernah mengirim <code>/start</code> ke bot toko Anda terlebih dahulu.</blockquote>
+<hr>
+<h3>3.3 Setup QRIS (<code>QRIS</code>)</h3>
+<p>Masuk ke menu <strong>QRIS</strong> (ikon QR Code di sidebar).</p>
+<ol><li>Isi kolom <strong>Nama Rekening/Akun</strong> (nama yang ditampilkan di bawah gambar QRIS ke pembeli).</li>
+<li>Upload gambar <strong>QRIS</strong> Anda (format: JPG/PNG, maksimal 2 MB).</li>
+<li>Klik <strong>Simpan</strong>.</li>
+</ol>
+<blockquote>Gambar QRIS ini akan otomatis dikirimkan bot ke pembeli saat pembeli diminta melakukan pembayaran.</blockquote>
+<hr>
+<h2>4. Manajemen Katalog</h2>
+<h3>4.1 Kategori (<code>Kategori</code>)</h3>
+<p>Kategori berfungsi sebagai pengelompokan produk di toko Telegram Anda.</p>
+<p><strong>Cara Membuat Kategori:</strong>
+<ol><li>Masuk ke menu <strong>Kategori</strong>.</li>
+<li>Klik tombol <strong>Tambah Kategori</strong>.</li>
+<li>Isi <strong>Nama Kategori</strong> dan <strong>Ikon</strong> (emoji, misal: 🎮).</li>
+<li>Aktifkan status <strong>Aktif</strong> agar kategori muncul di bot.</li>
+<li>Klik <strong>Simpan</strong>.</li>
+</ol>
+<strong>Tips:</strong> Buat kategori yang spesifik dan jelas, misalnya: <em>Akun Netflix</em>, <em>Akun Spotify</em>, <em>E-book Bisnis</em>.</p>
+<hr>
+<h3>4.2 Produk (<code>Produk</code>)</h3>
+<p>Produk adalah item yang dijual di dalam sebuah kategori.</p>
+<p><strong>Cara Membuat Produk:</strong>
+<ol><li>Masuk ke menu <strong>Produk</strong>.</li>
+<li>Klik tombol <strong>Tambah Produk</strong>.</li>
+<li>Isi data produk:</li>
+</ol>
+<table><tr><th>Kolom</th><th>Penjelasan</th></tr><tr><td><strong>Nama Produk</strong></td><td>Nama yang tampil di bot Telegram</td></tr><tr><td><strong>Kategori</strong></td><td>Pilih kategori yang sudah dibuat</td></tr><tr><td><strong>Tipe Produk</strong></td><td><code>account</code> (akun digital) atau <code>file</code>/<code>ebook</code></td></tr><tr><td><strong>Deskripsi</strong></td><td>Penjelasan singkat produk</td></tr><tr><td><strong>Status</strong></td><td>Aktif/Nonaktif</td></tr></table></p>
+<blockquote><strong>Perbedaan Tipe Produk:</strong></blockquote>
+<blockquote>- <strong><code>account</code></strong> → Produk berupa kredensial akun (username + password). Stok dihitung otomatis dari data akun yang diupload.</blockquote>
+<blockquote>- <strong><code>file</code> / <code>ebook</code></strong> → Produk berupa file digital atau teks. Stok diisi manual.</blockquote>
+<hr>
+<h3>4.3 Varian Produk</h3>
+<p>Satu produk bisa memiliki beberapa varian (misal: Netflix 1 Bulan, Netflix 3 Bulan, Netflix 1 Tahun).</p>
+<p><strong>Cara Membuat Varian:</strong>
+<ol><li>Buka halaman detail produk → klik <strong>Kelola Varian</strong>.</li>
+<li>Klik <strong>Tambah Varian</strong>.</li>
+<li>Isi data varian:</li>
+</ol>
+<table><tr><th>Kolom</th><th>Penjelasan</th></tr><tr><td><strong>Nama Varian</strong></td><td>Contoh: "1 Bulan", "3 Bulan"</td></tr><tr><td><strong>Harga</strong></td><td>Harga jual varian</td></tr><tr><td><strong>Harga Asli</strong></td><td>(Opsional) Harga coretan untuk menampilkan diskon</td></tr><tr><td><strong>Stok</strong></td><td>Hanya untuk produk tipe <code>file</code>; tipe <code>account</code> dihitung otomatis</td></tr><tr><td><strong>Status</strong></td><td>Aktif/Nonaktif</td></tr></table></p>
+<hr>
+<h3>4.4 Stok Akun (Khusus Produk Tipe <code>account</code>)</h3>
+<p>Untuk produk bertipe akun, stok diisi dengan cara mengupload daftar kredensial.</p>
+<p><strong>Cara Upload Kredensial Akun:</strong>
+<ol><li>Buka halaman <strong>detail varian</strong> → klik <strong>Kelola Stok Akun</strong>.</li>
+<li>Di kolom teks yang tersedia, masukkan daftar akun dengan format:</li>
+</ol>   <pre><code>email_atau_username:password
+   email_atau_username:password</code></pre>
+   Contoh:
+   <pre><code>user1@gmail.com:pass123
+   user2@gmail.com:pass456
+   akun3@email.com:mypassword</code></pre>
+<ol><li>Klik <strong>Tambah Akun</strong>.</li>
+<li>Sistem akan otomatis menghitung stok berdasarkan jumlah akun yang belum terjual.</li>
+</ol>
+<blockquote><strong>Info Stok:</strong></blockquote>
+<blockquote>- Akun berstatus <strong>Tersedia</strong>: belum terjual, siap dikirim ke pembeli.</blockquote>
+<blockquote>- Akun berstatus <strong>Terjual</strong>: sudah dikirim ke pembeli, tidak bisa digunakan lagi.</blockquote>
+<blockquote>- Admin bisa menghapus akun yang salah input.</blockquote></p>
+<hr>
+<h3>4.5 File Digital (<code>Digital Files</code>)</h3>
+<p>Untuk produk bertipe <strong>file/ebook</strong>, admin perlu mengupload file atau mengatur konten pengiriman.</p>
+<p><strong>Cara Setup Digital File:</strong>
+<ol><li>Masuk ke menu <strong>Digital Files</strong>.</li>
+<li>Klik <strong>Tambah File Digital</strong> atau asosiasikan file ke varian produk.</li>
+<li>Pilih <strong>Tipe Pengiriman</strong>:</li>
+</ol>
+<table><tr><th>Tipe</th><th>Cara Kerja</th></tr><tr><td><strong>File</strong></td><td>Upload file (PDF, ZIP, dll). Bot akan mengirim file langsung ke pembeli.</td></tr><tr><td><strong>Teks Otomatis</strong></td><td>Tulis teks berisi link download, kode lisensi, dll. Bot kirim teks ke pembeli.</td></tr><tr><td><strong>Manual</strong></td><td>Admin harus mengirim produk secara manual setelah pembayaran terverifikasi.</td></tr></table></p>
+<hr>
+<h2>5. Manajemen Transaksi</h2>
+<h3>5.1 Order (<code>Order</code>)</h3>
+<p>Menu <strong>Order</strong> menampilkan seluruh daftar pesanan yang masuk dari pembeli.</p>
+<p><strong>Kolom Informasi Order:</strong>
+<ul><li><strong>Invoice</strong> — Nomor unik pesanan</li>
+<li><strong>Pembeli</strong> — Nama user Telegram</li>
+<li><strong>Produk & Varian</strong> — Produk yang dipesan</li>
+<li><strong>Total</strong> — Nominal pembayaran</li>
+<li><strong>Status</strong> — Status pesanan saat ini</li>
+<li><strong>Tanggal</strong> — Waktu pesanan dibuat</li>
+</ul>
+<strong>Aksi yang Tersedia:</strong>
+<ul><li>Klik tombol <strong>Detail</strong> untuk melihat informasi lengkap pesanan.</li>
+<li>Batalkan pesanan jika diperlukan (admin manual).</li>
+</ul>
+<hr></p>
+<h3>5.2 Payment (Verifikasi Pembayaran)</h3>
+<p>Menu <strong>Payment</strong> menampilkan daftar semua pembayaran yang masuk beserta bukti transfer dari pembeli.</p>
+<h4>Verifikasi via Web Admin</h4>
+<ol><li>Klik <strong>Detail</strong> pada pembayaran yang berstatus <em>Menunggu Verifikasi</em>.</li>
+<li>Periksa <strong>foto bukti pembayaran</strong> dari pembeli.</li>
+<li>Klik tombol:</li>
+</ol>   - <strong>✅ Verifikasi</strong> jika pembayaran valid → sistem otomatis mengirim produk ke pembeli.
+   - <strong>❌ Tolak</strong> jika pembayaran tidak valid → masukkan alasan penolakan → sistem otomatis notifikasi ke pembeli.
+<h4>Verifikasi via Telegram Admin <em>(Cara Cepat)</em></h4>
+Saat pembeli mengunggah bukti bayar, bot akan <strong>langsung</strong> mengirimkan notifikasi ke Telegram Admin berupa:
+<ul><li>Foto bukti pembayaran</li>
+<li>Detail pesanan (invoice, produk, nominal, pembeli)</li>
+<li>Tombol <strong>[ ✅ Verifikasi ]</strong> dan <strong>[ ❌ Tolak ]</strong></li>
+</ul>
+Admin cukup <strong>menekan tombol langsung di Telegram</strong> tanpa harus membuka web admin.
+<blockquote><strong>Proteksi Klik Ganda:</strong> Jika tombol ditekan lebih dari sekali setelah pesanan berhasil diproses, sistem akan menampilkan notifikasi bahwa pesanan sudah diproses dan tidak akan memproses ulang.</blockquote>
+<hr>
+<h3>5.3 QRIS</h3>
+<p>Menu <strong>QRIS</strong> digunakan untuk mengelola gambar kode QR pembayaran yang dikirimkan ke pembeli.</p>
+<hr>
+<h2>6. Manajemen Telegram</h2>
+<h3>6.1 Telegram Users</h3>
+<p>Menu <strong>Telegram Users</strong> menampilkan seluruh pengguna yang pernah berinteraksi dengan bot.</p>
+<p><strong>Fitur yang Tersedia:</strong>
+<ul><li><strong>Cari pengguna</strong> berdasarkan nama atau username.</li>
+<li><strong>Filter</strong> berdasarkan status (aktif / diblokir).</li>
+<li><strong>Lihat Detail User</strong>: informasi profil, riwayat pesanan, status sesi bot.</li>
+<li><strong>Blokir / Buka Blokir User</strong>: pengguna yang diblokir tidak dapat menggunakan bot.</li>
+</ul>
+<hr></p>
+<h3>6.2 Broadcast</h3>
+<p>Fitur <strong>Broadcast</strong> memungkinkan admin mengirim pesan massal ke semua pengguna bot.</p>
+<p><strong>Cara Mengirim Broadcast:</strong>
+<ol><li>Masuk ke menu <strong>Broadcast</strong>.</li>
+<li>Tulis pesan yang ingin dikirim (mendukung teks panjang hingga 4.096 karakter).</li>
+<li>Pilih target penerima:</li>
+</ol>   - <strong>Semua User</strong> — Dikirim ke seluruh pengguna bot yang tidak diblokir.
+   - <strong>User Aktif</strong> — Hanya dikirim ke pengguna yang sudah pernah melakukan pemesanan.
+<ol><li>Klik <strong>Kirim Broadcast</strong>.</li>
+</ol>
+<blockquote><strong>Catatan:</strong> Broadcast dikirim via sistem antrean (Queue) agar tidak membebani server. Jumlah penerima yang berhasil dinotifikasi akan ditampilkan setelah proses selesai.</blockquote></p>
+<hr>
+<h2>7. Pengaturan Sistem</h2>
+<h3>7.1 Settings (Pengaturan)</h3>
+<em>(Sudah dijelaskan di bagian 3.2 — Setup Awal)</em>
+<hr>
+<h3>7.2 Activity Log</h3>
+<p>Menu <strong>Activity Log</strong> mencatat seluruh tindakan yang dilakukan oleh admin di dalam sistem, termasuk:</p>
+<ul><li>Verifikasi dan penolakan pembayaran</li>
+<li>Penambahan/perubahan produk</li>
+<li>Upload akun/stok</li>
+<li>Pengiriman broadcast</li>
+<li>Perubahan pengaturan</li>
+<li>Blokir/unblokir user Telegram</li>
+</ul>
+Setiap log mencatat: <strong>Aksi</strong>, <strong>Deskripsi</strong>, <strong>IP Address</strong>, dan <strong>Waktu</strong>.
+<hr>
+<h3>7.3 Admin (Manajemen Akun Admin)</h3>
+<p>Menu <strong>Admin</strong> digunakan untuk mengelola akun admin yang memiliki akses ke dashboard.</p>
+<p><strong>Fitur:</strong>
+<ul><li><strong>Tambah Admin Baru</strong>: Buat akun admin tambahan dengan email dan password baru.</li>
+<li><strong>Edit Admin</strong>: Ubah nama, email, atau password admin.</li>
+<li><strong>Hapus Admin</strong>: Hapus akun admin yang tidak diperlukan lagi.</li>
+</ul>
+<blockquote><strong>Keamanan:</strong> Setiap akun admin memiliki akses penuh ke dashboard. Pastikan hanya memberikan akses kepada pihak yang dipercaya.</blockquote></p>
+<hr>
+<h2>8. Panduan Pembeli via Bot Telegram</h2>
+<p>Bagian ini menjelaskan cara penggunaan bot dari sudut pandang <strong>pembeli</strong>.</p>
+<h3>8.1 Memulai Bot</h3>
+<ol><li>Cari bot di Telegram (contoh: <code>@NexoraDigitalStoreBot</code>).</li>
+<li>Klik <strong>START</strong> atau ketik <code>/start</code>.</li>
+<li>Bot akan menampilkan <strong>Menu Utama</strong> dengan pilihan:</li>
+</ol>   - 🛍️ Produk
+   - 📦 Pesanan Saya
+   - 💳 Cara Pembayaran
+   - ❓ Bantuan
+   - ☎️ Hubungi Admin
+<hr>
+<h3>8.2 Alur Pembelian</h3>
+<p><strong>Langkah 1: Pilih Produk</strong>
+<ol><li>Tekan tombol <strong>🛍️ Produk</strong>.</li>
+<li>Pilih <strong>Kategori</strong> yang tersedia.</li>
+<li>Pilih <strong>Produk</strong> yang diinginkan.</li>
+<li>Pilih <strong>Varian</strong> (misal: 1 Bulan, 3 Bulan, 1 Tahun).</li>
+</ol>
+<blockquote>Jika varian sedang habis stok, sistem otomatis menampilkan pesan "Mohon maaf, varian produk ini sedang habis."</blockquote></p>
+<p><strong>Langkah 2: Isi Catatan Pesanan</strong></p>
+<p>Bot akan meminta informasi tambahan (misal: username Instagram, email, nomor HP). Isi sesuai kebutuhan produk yang dibeli.</p>
+<p><strong>Langkah 3: Konfirmasi Order</strong></p>
+<p>Bot menampilkan ringkasan pesanan:
+<ul><li>Nama produk & varian</li>
+<li>Harga</li>
+<li>Catatan pesanan</li>
+</ul>
+Tekan <strong>✅ Konfirmasi Order</strong> untuk melanjutkan, atau <strong>❌ Batalkan Pesanan</strong> untuk membatalkan.</p>
+<p><strong>Langkah 4: Pembayaran</strong></p>
+<p>Bot akan mengirimkan:
+<ul><li>Gambar <strong>kode QRIS</strong> untuk pembayaran</li>
+<li>Nominal yang harus ditransfer</li>
+<li>Instruksi pembayaran</li>
+</ul>
+Lakukan transfer sesuai nominal yang tertera.</p>
+<p><strong>Langkah 5: Upload Bukti Pembayaran</strong></p>
+<p>Setelah transfer, <strong>kirim foto/gambar bukti pembayaran</strong> langsung ke chat bot.</p>
+<p>Bot akan mengkonfirmasi bahwa bukti sudah diterima dan sedang diverifikasi.</p>
+<p><strong>Langkah 6: Terima Produk</strong></p>
+<p>Setelah admin memverifikasi pembayaran, bot akan <strong>otomatis mengirimkan produk</strong> ke chat pembeli:
+<ul><li><strong>Akun digital</strong>: Username dan password dikirim langsung.</li>
+<li><strong>File digital</strong>: File dikirim langsung ke chat.</li>
+<li><strong>Teks/Lisensi</strong>: Kode atau link dikirim dalam bentuk pesan teks.</li>
+</ul>
+<hr></p>
+<h3>8.3 Cek Riwayat Pesanan</h3>
+<p>Pembeli dapat melihat 5 pesanan terakhir dengan menekan tombol <strong>📦 Pesanan Saya</strong> di menu utama.</p>
+<hr>
+<h3>8.4 Pembayaran Ditolak?</h3>
+<p>Jika admin menolak bukti pembayaran:
+<ol><li>Pembeli akan menerima notifikasi penolakan dari bot.</li>
+<li>Pesanan kembali ke status <strong>Menunggu Pembayaran</strong>.</li>
+<li>Pembeli perlu mengirim ulang bukti pembayaran yang valid.</li>
+</ol>
+<hr></p>
+<h2>9. Referensi Status</h2>
+<h3>Status Pesanan (Order)</h3>
+<table><tr><th>Status</th><th>Penjelasan</th></tr><tr><td><strong>Pending</strong></td><td>Pesanan baru dibuat, belum ada konfirmasi dari pembeli</td></tr><tr><td><strong>Menunggu Pembayaran</strong></td><td>Pembeli sudah konfirmasi, menunggu upload bukti bayar</td></tr><tr><td><strong>Menunggu Verifikasi</strong></td><td>Bukti bayar sudah diupload, menunggu verifikasi admin</td></tr><tr><td><strong>Dibayar (Paid)</strong></td><td>Pembayaran terverifikasi, produk sedang/akan dikirim</td></tr><tr><td><strong>Selesai (Completed)</strong></td><td>Produk sudah dikirim ke pembeli</td></tr><tr><td><strong>Dibatalkan (Cancelled)</strong></td><td>Pesanan dibatalkan</td></tr></table>
+<h3>Status Pembayaran</h3>
+<table><tr><th>Status</th><th>Penjelasan</th></tr><tr><td><strong>Belum Bayar</strong></td><td>Pembeli belum upload bukti pembayaran</td></tr><tr><td><strong>Menunggu Verifikasi</strong></td><td>Bukti bayar sudah diupload, menunggu konfirmasi admin</td></tr><tr><td><strong>Terverifikasi</strong></td><td>Admin sudah memverifikasi pembayaran</td></tr><tr><td><strong>Ditolak</strong></td><td>Bukti pembayaran ditolak oleh admin</td></tr></table>
+<h3>Tipe Pengiriman Digital File</h3>
+<table><tr><th>Tipe</th><th>Cara Pengiriman</th></tr><tr><td><strong>File</strong></td><td>File dikirim langsung ke chat Telegram pembeli</td></tr><tr><td><strong>Teks Otomatis</strong></td><td>Pesan teks (link/kode) dikirim ke chat Telegram pembeli</td></tr><tr><td><strong>Manual</strong></td><td>Admin mengirimkan produk secara manual (tidak otomatis)</td></tr></table>
+<hr>
+<blockquote><strong>Butuh Bantuan?</strong>  </blockquote>
+<blockquote>Hubungi tim teknis atau buka menu <strong>☎️ Hubungi Admin</strong> di bot Telegram untuk mendapatkan dukungan.</blockquote>
+</body>
+</html>
