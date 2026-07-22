@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Telegram;
 
 use App\Http\Controllers\Controller;
-use App\Services\TelegramBotService;
+use App\Services\Telegram\TelegramBotService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Laravel\Facades\Telegram;
 
 class WebhookController extends Controller
@@ -14,18 +15,18 @@ class WebhookController extends Controller
 
     /**
      * Handle incoming Telegram webhook.
-     * Return 200 cepat ke Telegram, proses di background via Queue.
+     * Return 200 cepat ke Telegram.
      */
     public function handle(Request $request): Response
     {
         try {
-            $update = Telegram::getWebhookUpdate();
+            $update = Telegram::commandsHandler(true);
 
             if ($update) {
                 $this->botService->handleUpdate($update);
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error("Telegram Webhook Error: " . $e->getMessage(), [
+            Log::error("Telegram Webhook Error: " . $e->getMessage(), [
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ]);
