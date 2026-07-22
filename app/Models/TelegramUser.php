@@ -20,7 +20,7 @@ class TelegramUser extends Model
 
     /** @var array<string, string> */
     protected $casts = [
-        'telegram_id' => 'integer',
+        'telegram_id' => 'string',
         'is_blocked'  => 'boolean',
     ];
 
