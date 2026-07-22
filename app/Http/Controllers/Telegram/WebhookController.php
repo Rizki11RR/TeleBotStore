@@ -20,7 +20,7 @@ class WebhookController extends Controller
     public function handle(Request $request): Response
     {
         try {
-            $update = Telegram::commandsHandler(true);
+            $update = Telegram::getWebhookUpdate();
 
             if ($update) {
                 $this->botService->handleUpdate($update);
